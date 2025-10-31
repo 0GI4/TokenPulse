@@ -1,0 +1,42 @@
+# Node / PNPM
+node_modules/
+.pnpm-store/
+.pnp.cjs
+.pnp.loader.mjs
+
+# Build outputs
+dist/
+**/dist/
+*.tsbuildinfo
+
+# Logs & coverage
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+.nyc_output/
+
+# Tool caches
+.cache/
+.parcel-cache/
+.next/
+.vite/
+.storybook-out/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Env & local configs
+.env
+.env.*
+!.env.example
+
+# Docker local data (если используешь bind-mounts для данных)
+docker-data/
+**/data/
+**/tmp/
