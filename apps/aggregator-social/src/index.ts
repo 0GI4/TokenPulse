@@ -6,7 +6,7 @@ const broker = process.env.KAFKA_BROKER ?? "localhost:19092";
 const kafka = new Kafka({ clientId: "tp-aggregator", brokers: [broker] });
 const consumer = kafka.consumer({ groupId: "aggregator-v1" });
 const ch = createClient({
-  host: process.env.CLICKHOUSE_URL ?? "localhost:8123",
+  url: process.env.CLICKHOUSE_URL ?? "http://localhost:8123",
 });
 
 type Row = {

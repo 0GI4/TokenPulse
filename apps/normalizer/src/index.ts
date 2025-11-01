@@ -7,7 +7,7 @@ const kafka = new Kafka({ clientId: "tp-normalizer", brokers: [broker] });
 const consumer = kafka.consumer({ groupId: "normalizer-v1" });
 const producer = kafka.producer();
 const ch = createClient({
-  host: process.env.CLICKHOUSE_URL ?? "http://localhost:8123",
+  url: process.env.CLICKHOUSE_URL ?? "http://localhost:8123",
 });
 
 function simpleSentiment(text: string): number {
