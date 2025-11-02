@@ -1,3 +1,4 @@
+// apps/aggregator-social/src/index.ts
 import { createClient } from "@clickhouse/client";
 import "dotenv/config";
 import { Kafka } from "kafkajs";
@@ -25,32 +26,74 @@ function minuteKey(tsISO: string) {
   return minute;
 }
 
+let flushing = false;
 async function flush() {
+  if (flushing) return;
   if (!buckets.size) return;
-  const values = [];
-  for (const {
-    minute,
-    token_id,
-    mentions,
-    sum_sent,
-    sum_fol,
-  } of buckets.values()) {
-    values.push({
-      minute: minute,
+  flushing = true;
+  try {
+    const values: Array<{
+      minute: string;
+      token_id: string;
+      mentions: number;
+      avg_sentiment: number;
+      avg_followers: number;
+    }> = [];
+    for (const {
+      minute,
       token_id,
       mentions,
-      avg_sentiment: mentions ? sum_sent / mentions : 0,
-      avg_followers: mentions ? sum_fol / mentions : 0,
+      sum_sent,
+      sum_fol,
+    } of buckets.values()) {
+      values.push({
+        minute,
+        token_id,
+        mentions,
+        avg_sentiment: mentions ? sum_sent / mentions : 0,
+        avg_followers: mentions ? sum_fol / mentions : 0,
+      });
+    }
+    buckets.clear();
+    await ch.insert({
+      table: "tokenpulse.aggregated_social_metrics",
+      values,
+      format: "JSONEachRow",
     });
+    console.log(`flushed ${values.length} rows`);
+  } finally {
+    flushing = false;
   }
-  buckets.clear();
-  await ch.insert({
-    table: "tokenpulse.aggregated_social_metrics",
-    values,
-    format: "JSONEachRow",
-  });
-  console.log(`flushed ${values.length} rows`);
 }
+
+async function gracefulExit(code = 0) {
+  try {
+    await flush();
+    await consumer.disconnect();
+    await ch.close();
+  } catch (e) {
+    console.error("gracefulExit error", e);
+  } finally {
+    process.exit(code);
+  }
+}
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received, flushing…");
+  gracefulExit(0);
+});
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received, flushing…");
+  gracefulExit(0);
+});
+process.on("uncaughtException", (e) => {
+  console.error("uncaughtException", e);
+  gracefulExit(1);
+});
+process.on("unhandledRejection", (e: any) => {
+  console.error("unhandledRejection", e);
+  gracefulExit(1);
+});
 
 async function main() {
   await consumer.connect();
@@ -83,7 +126,7 @@ async function main() {
     },
   });
 
-  console.log("aggregator running");
+  console.log("aggregator running with graceful flush");
 }
 
 main().catch((e) => {

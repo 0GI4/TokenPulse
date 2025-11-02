@@ -1,6 +1,8 @@
+// apps/normalizer/index.ts
 import "dotenv/config";
 import { Kafka } from "kafkajs";
 import { createClient } from "@clickhouse/client";
+import { EnrichedMention } from "@tokenpulse/shared/events";
 
 const broker = process.env.KAFKA_BROKER ?? "localhost:19092";
 const kafka = new Kafka({ clientId: "tp-normalizer", brokers: [broker] });
@@ -18,7 +20,7 @@ function simpleSentiment(text: string): number {
   return Math.max(-1, Math.min(1, s));
 }
 
-async function persistToCH(ev: any) {
+async function persistToCH(ev: EnrichedMention) {
   await ch.insert({
     table: "tokenpulse.enriched_mentions",
     values: [
@@ -48,24 +50,35 @@ async function main() {
     eachMessage: async ({ message }) => {
       if (!message.value) return;
       const raw = JSON.parse(message.value.toString());
-      const normalized = {
+
+      // Мягкая нормализация сырых полей из генератора
+      const evCandidate = {
         ts: raw.created_at,
-        source: "twitter",
+        source: "twitter" as const,
         token_id: (raw.token_ids && raw.token_ids[0]) || "UNKNOWN",
         lang: raw.lang || "en",
-        sentiment: simpleSentiment(raw.text),
-        user_followers: raw.followers || 0,
+        sentiment: simpleSentiment(raw.text || ""),
+        user_followers: Number(raw.followers) || 0,
         is_bot: false,
       };
+
+      // Валидация — если не проходит, логируем и пропускаем
+      const parsed = EnrichedMention.safeParse(evCandidate);
+      if (!parsed.success) {
+        console.error("normalize: invalid payload", parsed.error.flatten());
+        return;
+      }
+      const valid = parsed.data;
+
       await producer.send({
         topic: "normalized.social.mentions",
-        messages: [{ key: raw.id, value: JSON.stringify(normalized) }],
+        messages: [{ key: raw.id || valid.ts, value: JSON.stringify(valid) }],
       });
-      await persistToCH(normalized);
+      await persistToCH(valid);
     },
   });
 
-  console.log("normalizer running");
+  console.log("normalizer running with zod validation");
 }
 
 main().catch((err) => {

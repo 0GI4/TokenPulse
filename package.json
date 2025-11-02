@@ -4,7 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev:infra:up": "docker compose -f infra/docker-compose.yaml up -d",
+    "dev:infra:logs": "docker compose -f infra/docker-compose.yaml logs -f",
+    "dev:infra:down": "docker compose -f infra/docker-compose.yaml down -v",
+    "dev:ingestor": "node apps/ingestors/index.js",
+    "dev:normalizer": "node apps/normalizer/index.js",
+    "dev:aggregator": "node apps/aggregator-social/src/index.js",
+    "dev:apps": "pnpm -r --parallel --filter ./apps/** run start",
+    "dev:all": "pnpm run dev:apps"
   },
   "keywords": [],
   "author": "",
