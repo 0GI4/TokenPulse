@@ -18,17 +18,26 @@ export class SocialService {
 
     const rows = await this.chs.ch.query({
       query: `
-        SELECT
-          formatDateTime(hour, '%Y-%m-%d %H:00:00') AS hour,
-          mentions,
-          round(avg_sentiment, 6) AS avg_sentiment,
-          round(avg_followers, 3) AS avg_followers
-        FROM tokenpulse.aggregated_social_hourly
-        WHERE token_id = {token:String}
-          AND hour >= toDateTime({from:String})
-          AND hour <  toDateTime({to:String})
-        ORDER BY hour ASC
-      `,
+  SELECT
+    formatDateTime(h, '%Y-%m-%d %H:00:00') AS hour,
+    m AS mentions,
+    if(m = 0, 0, s_sent / m)  AS avg_sentiment,
+    if(m = 0, 0, s_fol  / m)  AS avg_followers
+  FROM
+  (
+    SELECT
+      hour AS h,
+      sum(mentions)                         AS m,
+      sum(avg_sentiment * mentions)         AS s_sent,
+      sum(avg_followers * mentions)         AS s_fol
+    FROM tokenpulse.aggregated_social_hourly
+    WHERE token_id = {token:String}
+      AND hour >= toDateTime({from:String})
+      AND hour <  toDateTime({to:String})
+    GROUP BY h
+  )
+  ORDER BY hour ASC
+`,
       format: "JSONEachRow",
       query_params: {
         token: q.token,
