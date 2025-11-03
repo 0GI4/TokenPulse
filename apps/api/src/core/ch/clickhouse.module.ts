@@ -1,6 +1,6 @@
-import { Module } from "@nestjs/common";
-import { ClickhouseService } from "./clickhouse.service";
-import { ConfigModule } from "../config/config.module";
+﻿import { Module } from "@nestjs/common";
+import { ClickhouseService } from "./clickhouse.service.js";
+import { ConfigModule } from "../config/config.module.js";
 
 @Module({
   imports: [ConfigModule],

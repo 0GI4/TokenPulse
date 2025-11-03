@@ -11,7 +11,8 @@
     "dev:normalizer": "node apps/normalizer/index.js",
     "dev:aggregator": "node apps/aggregator-social/src/index.js",
     "dev:apps": "pnpm -r --parallel --filter ./apps/** run start",
-    "dev:all": "pnpm run dev:apps"
+    "dev:api": "pnpm --filter @tokenpulse/api run start",
+    "dev:all": "pnpm -r build && pnpm run dev:apps && pnpm run dev:api"
   },
   "keywords": [],
   "author": "",

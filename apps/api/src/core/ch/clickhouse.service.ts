@@ -1,6 +1,6 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
+﻿import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { createClient, ClickHouseClient } from "@clickhouse/client";
-import { ConfigService } from "../config/config.service";
+import { ConfigService } from "../config/config.service.js";
 
 @Injectable()
 export class ClickhouseService implements OnModuleDestroy {

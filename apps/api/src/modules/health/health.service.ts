@@ -1,5 +1,5 @@
-import { Injectable } from "@nestjs/common";
-import { ClickhouseService } from "../../core/ch/clickhouse.service";
+﻿import { Injectable } from "@nestjs/common";
+import { ClickhouseService } from "../../core/ch/clickhouse.service.js";
 
 @Injectable()
 export class HealthService {
