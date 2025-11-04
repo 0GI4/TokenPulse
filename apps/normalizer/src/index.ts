@@ -14,10 +14,17 @@ const ch = createClient({
 
 function simpleSentiment(text: string): number {
   const t = text.toLowerCase();
-  let s = 0;
-  if (t.includes("bullish") || t.includes("moon")) s += 0.6;
-  if (t.includes("bearish") || t.includes("dump")) s -= 0.6;
-  return Math.max(-1, Math.min(1, s));
+
+  const pos = ["bullish", "moon", "pump", "ath", "breakout", "🚀", "rocket"];
+  const neg = ["bearish", "dump", "rug", "crash", "scam", "rekt", "down"];
+
+  let score = 0;
+  for (const w of pos) if (t.includes(w)) score += 1;
+  for (const w of neg) if (t.includes(w)) score -= 1;
+
+  if (score > 0) return Math.min(1, 0.2 + score * 0.4);
+  if (score < 0) return Math.max(-1, -0.2 + score * 0.4);
+  return 0;
 }
 
 async function persistToCH(ev: EnrichedMention) {
