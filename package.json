@@ -12,6 +12,9 @@
     "dev:aggregator": "node apps/aggregator-social/src/index.js",
     "dev:apps": "pnpm -r --parallel --filter ./apps/** run start",
     "dev:api": "pnpm --filter @tokenpulse/api run start",
+    "dev:web": "pnpm --filter @tokenpulse/web run dev",
+    "build:web": "pnpm --filter @tokenpulse/web run build",
+    "preview:web": "pnpm --filter @tokenpulse/web run preview",
     "dev:all": "pnpm -r build && pnpm run dev:apps && pnpm run dev:api"
   },
   "keywords": [],
