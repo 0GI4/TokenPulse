@@ -13,3 +13,16 @@ export async function fetchHourly(token: string, from?: Date, to?: Date) {
     sentiment: Number(x.avg_sentiment),
   }));
 }
+
+export async function fetchHourlyMulti(
+  tokens: string[],
+  from?: Date,
+  to?: Date
+) {
+  const p = new URLSearchParams({ tokens: tokens.join(",") });
+  if (from) p.set("from", from.toISOString());
+  if (to) p.set("to", to.toISOString());
+  const res = await fetch(`/api/social/hourly-multi?${p.toString()}`);
+  if (!res.ok) throw new Error(`hourly-multi: ${res.status}`);
+  return res.json(); // { ok, from, to, data: { ETH: [...], BTC: [...], ... } }
+}

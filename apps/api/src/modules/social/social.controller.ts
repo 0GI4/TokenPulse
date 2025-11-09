@@ -12,4 +12,18 @@ export class SocialController {
   async hourly(@Query() q: unknown) {
     return this.svc.hourly(q as any);
   }
+
+  @Get("hourly-multi")
+  async hourlyMulti(
+    @Query("tokens") tokens?: string,
+    @Query("from") from?: string,
+    @Query("to") to?: string
+  ) {
+    const list = (tokens || "")
+      .split(",")
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean)
+      .slice(0, 20);
+    return this.svc.hourlyMulti(list, from, to);
+  }
 }

@@ -2,9 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import TokenDashboard from "./pages/TokenDashboard";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <TokenDashboard />
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
