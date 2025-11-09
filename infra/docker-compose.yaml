@@ -32,9 +32,6 @@ services:
       - "9000:9000"
     volumes:
       - ch_data:/var/lib/clickhouse
-      - ./infra/ch-init.sql:/docker-entrypoint-initdb.d/01_ch-init.sql:ro
-      - ./infra/ch-aggr.sql:/docker-entrypoint-initdb.d/02_ch-aggr.sql:ro
-      - ./infra/ch-hourly.sql:/docker-entrypoint-initdb.d/03_ch-hourly.sql:ro
-      - ./infra/ch-mv-enriched-to-hourly.sql:/docker-entrypoint-initdb.d/04_ch-mv-enriched-to-hourly.sql:ro
+      - ./sql:/docker-entrypoint-initdb.d:ro
 volumes:
   ch_data:
